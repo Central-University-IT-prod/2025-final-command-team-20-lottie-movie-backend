@@ -1,0 +1,65 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model User {
+    id        String     @id
+    firstName String
+    lastName  String?
+    username  String?
+    notes     Note[]
+    Room      Room[]
+    target    Json
+    ReelLike  ReelLike[]
+}
+
+model Note {
+    id          Int     @id @default(autoincrement())
+    user        User    @relation(fields: [userId], references: [id])
+    userId      String
+    film        Film?   @relation(fields: [filmId], references: [id])
+    filmId      Int?
+    description String?
+    title       String?
+    isSeen      Boolean @default(false)
+}
+
+model Film {
+    id               Int        @id @default(autoincrement())
+    name             String
+    year             String?
+    description      String?
+    countries        String[]
+    genres           String[]
+    rating           Float?
+    ratingVoteCount  Int
+    posterUrl        String
+    posterUrlPreview String
+    notes            Note[]
+    reelName         String?
+    ReelLike         ReelLike[]
+}
+
+model ReelLike {
+    film   Film   @relation(fields: [filmId], references: [id])
+    filmId Int
+    user   User   @relation(fields: [userId], references: [id])
+    userId String
+
+    createdAt DateTime @default(now())
+
+    @@unique([filmId, userId])
+}
+
+model Room {
+    id           Int      @id @default(autoincrement())
+    code         String   @unique
+    host         User     @relation(fields: [hostId], references: [id])
+    hostId       String
+    participants String[]
+}
